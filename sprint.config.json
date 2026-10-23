@@ -1,0 +1,33 @@
+{
+  "sprint": {
+    "name": "Sprint 1",
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD",
+    "status": "draft"
+  },
+  "git": {
+    "baseRef": "",
+    "headRef": "HEAD",
+    "repositoryUrl": "",
+    "outputFile": "data/sprint-intelligence/git-changes.json"
+  },
+  "github": {
+    "owner": "",
+    "repo": "",
+    "baseRef": "",
+    "headRef": "",
+    "includePullRequests": true
+  },
+  "figma": {
+    "fileUrl": "",
+    "fileKey": "",
+    "baselineVersionId": "",
+    "currentVersionId": "",
+    "frameNodeIds": [],
+    "maxFrames": 20
+  },
+  "report": {
+    "title": "Sprint Change Intelligence",
+    "outputFile": "data/sprint-intelligence/report.json"
+  }
+}

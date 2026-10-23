@@ -1,0 +1,21 @@
+{
+  "name": "sprint-intelligence",
+  "version": "0.2.0",
+  "private": false,
+  "description": "Evidence-based sprint design and engineering change reports for Claude Code, Figma, and GitHub.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "node scripts/sprint-intelligence.mjs setup",
+    "check": "node scripts/sprint-intelligence.mjs check",
+    "versions": "node scripts/sprint-intelligence.mjs versions",
+    "github": "node scripts/collect-github.mjs",
+    "collect": "node scripts/sprint-intelligence.mjs collect",
+    "report": "node scripts/sprint-intelligence.mjs report",
+    "build": "node scripts/sprint-intelligence.mjs build",
+    "preview": "node scripts/preview.mjs",
+    "install-skill": "node scripts/install.mjs"
+  }
+}

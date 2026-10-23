@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "title": "Sprint Change Intelligence",
+    "sprintName": "Example Sprint",
+    "startDate": "2026-01-05",
+    "endDate": "2026-01-16",
+    "generatedAt": "2026-01-16T17:00:00.000Z",
+    "status": "sample",
+    "baseCommit": "example-base-sha",
+    "headCommit": "example-head-sha",
+    "figmaBaselineVersion": "example-baseline",
+    "figmaCurrentVersion": "example-current",
+    "collectionWarnings": [
+      "This is preview data only. Run npm run build to generate a report from your own sources."
+    ]
+  },
+  "summary": {
+    "added": 1,
+    "modified": 1,
+    "removed": 0,
+    "needsReview": 2
+  },
+  "changes": [
+    {
+      "id": "example-1",
+      "title": "Metric summary card",
+      "type": "modified",
+      "area": "Example dashboard \u00b7 metric card",
+      "summary": "Example only: the card spacing and displayed metric label changed between two design versions.",
+      "designStatus": "not-verified",
+      "releaseStatus": "not-verified",
+      "confidence": "medium",
+      "evidence": [],
+      "beforeImage": "",
+      "afterImage": "",
+      "designNotes": [
+        "Example design note: verify spacing, label hierarchy, and responsive behavior."
+      ],
+      "engineeringNotes": [
+        "Example engineering note: confirm component props and responsive styles match the approved design."
+      ]
+    },
+    {
+      "id": "example-2",
+      "title": "Date range filter panel",
+      "type": "added",
+      "area": "Example analytics page \u00b7 filter panel",
+      "summary": "Example only: a date range filter was added to a generic analytics interface.",
+      "designStatus": "not-verified",
+      "releaseStatus": "not-verified",
+      "confidence": "low",
+      "evidence": [],
+      "beforeImage": "",
+      "afterImage": "",
+      "designNotes": [
+        "Example design note: confirm empty, selected, and validation states."
+      ],
+      "engineeringNotes": [
+        "Example engineering note: confirm keyboard behavior and date parsing."
+      ]
+    }
+  ]
+}
