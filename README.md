@@ -1,113 +1,246 @@
-# Sprint Intelligence
+# Design Sprint Intelligence
 
-An installable Claude Code skill and local toolchain for comparing sprint handoffs across Figma and Git, then generating an interactive release report with visual evidence and engineering notes.
+**Connect Figma design handoffs to Git implementation changes.**
 
-**V1 is a local, read-only tool.** It collects Figma version/frame evidence and Git changes, then builds a browser-based report. It does not deploy your application, automatically prove release status, or claim semantic/pixel-perfect visual diffing. Human review is required.
+Design Sprint Intelligence is an open-source tool that compares design changes across Figma versions with code changes across Git commits, then generates an interactive report with visual evidence and engineering notes.
 
-## What works
+It was created to address a growing gap in software development: as AI accelerates design and code generation, teams need better ways to understand what changed, connect design intent to implementation evidence, and review work across sprint handoffs.
 
-- Claude Code `/sprint-handoff` skill.
-- Local Git comparison between a previous handoff ref and current ref.
-- Figma REST API connection using the user's own token.
-- Figma version listing, version-specific file retrieval, top-level frame selection, and before/after PNG exports.
-- Structured comparison of selected node properties across Figma versions.
-- Interactive report populated from collected evidence.
-- Local preview server with no additional npm dependencies.
-- No credentials are bundled. Tokens remain in the user's local `.env` file.
+The tool brings design and engineering evidence into one place to support more informed product, design, and engineering reviews.
+
+## The problem it addresses
+
+Figma captures design intent. Git captures code changes. Sprint tickets capture requirements and decisions.
+
+But these artifacts often live in separate places, leaving teams to manually reconstruct what changed between handoffs.
+
+Design Sprint Intelligence helps bring those signals together so teams can investigate:
+
+- What changed between two Figma design versions?
+- What changed in the code between two Git references?
+- What visual evidence is available to review?
+- Where is additional human validation needed to assess design and implementation alignment?
+
+## What it does
+
+- **Figma comparison:** Retrieves version-specific design data and exports before-and-after screenshots of selected frames.
+- **Git comparison:** Collects changed-file metadata and commit history between a baseline and a current Git reference.
+- **GitHub evidence:** Optionally retrieves comparison and pull request metadata.
+- **Interactive reporting:** Generates a local browser-based report combining design evidence and engineering changes.
+- **Claude Code skill:** Includes a `/sprint-handoff` skill to guide the workflow.
+
+## Project status
+
+**Early release (V1).**
+
+The local Git comparison and report-generation workflow has been tested. The Figma and GitHub API integrations require configuration with your own credentials and should be validated against your files and repositories before being relied on in production workflows.
+
+V1 is a local, read-only tool. It does not deploy applications, push commits, merge branches, automatically verify production release status, calculate pixel-level image differences, or prove that the implementation matches the design.
+
+The report organizes evidence for human review. It does not replace design QA, engineering review, or release verification.
 
 ## Requirements
 
-- Node.js 20 or newer.
-- Git and a local clone of the product repository (or this tool copied into it).
-- Claude Code for the slash-command workflow. The collectors/report can also run without Claude Code.
-- Figma personal access token with read access to the target file and version history.
-- Access to the Git repository you want to compare.
+Before getting started, you will need:
 
-## Quick start
+- Node.js 20 or newer
+- Git
+- A local clone of the product repository you want to analyze
+- Access to the relevant Figma file and its version history
+- A Figma personal access token with the required read permissions
+- Claude Code for the guided slash-command workflow
 
-1. Download or clone this repository. To install into an existing product repository, keep this tool in its own folder and run the installer from the target product repository:
+The collection and reporting scripts can also run without Claude Code.
 
-   ```bash
-   node /path/to/sprint-intelligence/scripts/install.mjs
-   ```
+## Installation
 
-   Replace `/path/to/sprint-intelligence` with the actual folder where you cloned or extracted this tool. The installer copies the skill and namespaced scripts, preserves existing files, adds namespaced npm scripts, and adds generated artifacts/secrets to `.gitignore`. If your project already has `sprint.config.json`, merge the required configuration rather than replacing your existing file.
-2. From the target project root, run:
+The tool installs into an existing product repository. You will work with two folders:
 
-   ```bash
-   npm run sprint-intelligence:setup
-   ```
+1. The **Design Sprint Intelligence repository**, which contains the tool.
+2. Your **product repository**, which contains the application you want to analyze.
 
-3. Edit `sprint.config.json`:
-   - `sprint.name`, `startDate`, and `endDate`.
-   - `git.baseRef`: the immutable commit SHA/tag for the previous accepted handoff.
-   - `git.headRef`: current handoff SHA or `HEAD`.
-   - `git.repositoryUrl`: optional GitHub repository URL for evidence links.
-   - `figma.fileUrl` or `figma.fileKey`.
-   - `figma.frameNodeIds`: optional list of node IDs. If empty, the collector selects up to `maxFrames` top-level frames from the current Figma version.
-4. Open `.env` and add your Figma token:
+Do not run the installer from an unrelated directory. The installer should be run from the root of your target product repository.
 
-   ```dotenv
-   FIGMA_ACCESS_TOKEN=your_personal_access_token
-   GITHUB_TOKEN=your_read_only_github_token
-   ```
+### Step 1: Download the tool
 
-   Create the token in Figma's account settings. Grant the minimum read scopes required by your organization and the endpoints used. Do not paste the token into Claude chat or commit `.env`.
-5. List available versions:
+Clone this repository:
 
-   ```bash
-   npm run sprint-intelligence:versions
-   ```
+```bash
+git clone https://github.com/nikkiwolfe/Design-Sprint-Intelligence.git
+```
 
-6. Copy the exact baseline and current version IDs into `figma.baselineVersionId` and `figma.currentVersionId` in `sprint.config.json`. The baseline should be the previously accepted handoff, not just the last autosave. The current version should represent the handoff being reviewed.
-7. Check and build:
+Alternatively, open the repository on GitHub, select **Code → Download ZIP**, and extract the downloaded archive.
 
-   ```bash
-   npm run sprint-intelligence:check
-   npm run sprint-intelligence:build
-   npm run sprint-intelligence:preview
-   ```
+### Step 2: Install into your product repository
 
-8. Open the local URL printed by `npm run sprint-intelligence:preview`. Run `/sprint-handoff` in Claude Code for the guided workflow.
+Open a terminal in your existing product repository's root directory.
 
-## Figma API scopes and endpoints
+Run the installer using the actual path to the downloaded or cloned tool:
 
-The collector uses Figma's version-history endpoint, file endpoint at specific versions, and image-rendering endpoint. Figma may require `file_versions:read` and `file_content:read` scopes for the token and plan. If an endpoint returns 403, review the token's scopes and the account's access to the file.
+```bash
+node /absolute/path/to/Design-Sprint-Intelligence/scripts/install.mjs
+```
 
-- Version history: https://developers.figma.com/docs/rest-api/version-history-endpoints/
-- File and node data / image rendering: https://developers.figma.com/docs/rest-api/file-endpoints/
-- Scopes: https://developers.figma.com/docs/rest-api/scopes/
+Replace `/absolute/path/to/Design-Sprint-Intelligence` with the actual location of the tool on your computer.
 
-## Git comparison
+For example, if both folders are located next to each other, you might run:
 
-The local Git collector compares `git.baseRef` to `git.headRef`. Use immutable commit SHAs where possible. `git.repositoryUrl` is used to construct links to files at the current commit. The collector does not need a GitHub token for local Git diffs.
+```bash
+node ../Design-Sprint-Intelligence/scripts/install.mjs
+```
 
-To add PR metadata from GitHub, configure `github.owner`, `github.repo`, `github.baseRef`, and `github.headRef` in `sprint.config.json`, then set `GITHUB_TOKEN` in `.env` for private repositories or higher rate limits. Use a read-only token with minimum repository contents/pull request permissions. The collector uses GitHub's compare endpoint and commit-associated pull requests. `npm run sprint-intelligence:build` includes this step when those fields are configured after installation. GitHub API docs: https://docs.github.com/en/rest/commits/commits#compare-two-commits.
+The installer copies the namespaced scripts, Claude Code skill, configuration template, and report viewer into your product repository. It also adds the tool's npm commands and updates `.gitignore` to exclude generated evidence and secrets.
 
-## What the report means
+Existing project files and configuration are intended to be preserved. If your project already has `sprint.config.json`, merge the required settings instead of replacing your existing configuration.
 
-- **Design changes:** detected through selected node properties and frame screenshots at two Figma versions.
-- **Engineering changes:** detected from Git diff metadata and commit history.
-- **Visual evidence:** before/after images are rendered from Figma; V1 displays them side by side but does not calculate pixel-level image diffs.
-- **Design/code alignment:** deliberately left `not-verified` unless supported by additional direct evidence. Claude may help interpret evidence, but its interpretation must be reviewed.
-- **Release status:** never inferred from a commit. Add a deployment source in a future version or mark release status manually with evidence.
+### Step 3: Run setup
 
-## Common issues
+From your product repository's root directory, run:
 
-- **Figma 403:** confirm token scope, file access, and version-history access.
-- **No Figma frames:** set `figma.frameNodeIds` using node IDs from the Figma URL or enable access to the file's current version.
-- **No Git comparison:** make sure `git.baseRef` resolves to a commit in the local repository.
-- **Report won't load:** use `npm run sprint-intelligence:preview`; do not open `report/index.html` as a `file://` URL.
-- **Missing screenshot:** Figma may return a null image for unsupported or non-renderable nodes. The report will still record the frame metadata.
+```bash
+npm run sprint-intelligence:setup
+```
 
-## Security and privacy
+This initializes the local tool setup and creates `.env` from `.env.example` if `.env` does not already exist.
 
-- Keep `.env` private. Never commit API tokens.
-- Figma screenshots are saved locally under `evidence/sprint-intelligence/design/`; treat them as potentially confidential client assets.
-- The tool does not upload project data to a public service. Claude Code may process files according to the user's Claude configuration and policies; follow your organization's data rules.
-- Do not publish generated reports or screenshots publicly without authorization.
-- The tool performs read-only collection and does not push commits, merge branches, or deploy releases.
+**Important:** If you already have a `.env` file, the setup process preserves it. Add the required variables to your existing file instead of replacing it.
 
-## License
+### Step 4: Configure your sprint
 
-MIT. See `LICENSE`. If you distribute a modified copy, retain the copyright and license notice.
+Open `sprint.config.json` in your product repository.
+
+Set the sprint information:
+
+- `sprint.name`
+- `sprint.startDate`
+- `sprint.endDate`
+
+Configure the Git comparison:
+
+- `git.baseRef`: the commit SHA or tag representing the previously accepted handoff.
+- `git.headRef`: the current handoff commit SHA or `HEAD`.
+- `git.repositoryUrl`: optional GitHub repository URL used to construct evidence links.
+
+Whenever possible, use immutable commit SHAs for repeatable comparisons.
+
+Configure the Figma connection:
+
+- `figma.fileUrl` or `figma.fileKey`: identifies the Figma file.
+- `figma.baselineVersionId`: the previously accepted design version.
+- `figma.currentVersionId`: the design version you want to review.
+- `figma.frameNodeIds`: optional list of specific Figma node IDs to track.
+
+If no frame IDs are provided, the collector selects up to the configured maximum number of top-level frames from the current Figma version.
+
+Use the configuration structure supplied with the tool. Do not remove existing project-specific configuration fields.
+
+### Step 5: Connect your Figma account
+
+Open the `.env` file in your product repository.
+
+Add your Figma personal access token:
+
+```dotenv
+FIGMA_ACCESS_TOKEN=your_personal_access_token
+```
+
+Create the token in your Figma account settings and grant only the minimum read permissions required by the endpoints and your organization's access policies.
+
+Never commit `.env`, publish your token, or paste credentials into a public issue or chat.
+
+### Step 6: Select your Figma versions
+
+List the available Figma versions:
+
+```bash
+npm run sprint-intelligence:versions
+```
+
+Copy the exact version IDs for the baseline and current design handoff into `sprint.config.json`.
+
+The baseline should represent the previously accepted design handoff, not simply the most recent autosave. The current version should represent the design state you want to review.
+
+For the most useful comparison, select versions that correspond as closely as possible to the Git references used for the engineering comparison.
+
+### Step 7: Validate and generate the report
+
+Check your configuration:
+
+```bash
+npm run sprint-intelligence:check
+```
+
+Collect evidence and generate the report:
+
+```bash
+npm run sprint-intelligence:build
+```
+
+Start the local preview server:
+
+```bash
+npm run sprint-intelligence:preview
+```
+
+Open the local URL printed in your terminal.
+
+Use the preview server rather than opening `report/index.html` directly as a `file://` URL. The report loads its data separately and needs the local server to serve the files correctly.
+
+### Step 8: Use the Claude Code skill
+
+If you use Claude Code, open your product repository and run:
+
+```text
+/sprint-handoff
+```
+
+The included skill guides the sprint handoff workflow.
+
+You can also run the collectors and report-generation commands directly without Claude Code.
+
+## Optional: GitHub pull request metadata
+
+GitHub integration is optional. The local Git collector does not require a GitHub token to compare commits in your local repository.
+
+To include GitHub comparison and pull request metadata, configure the following fields in `sprint.config.json`:
+
+- `github.owner`
+- `github.repo`
+- `github.baseRef`
+- `github.headRef`
+
+Add a token to `.env` when required for private repositories or higher API rate limits:
+
+```dotenv
+GITHUB_TOKEN=your_read_only_github_token
+```
+
+Use a token with the minimum repository read permissions needed for the configured endpoints.
+
+The GitHub integration adds context to the report; it does not replace the local Git comparison.
+
+Official API reference: [GitHub compare two commits](https://docs.github.com/en/rest/commits/commits#compare-two-commits).
+
+## Understanding the report
+
+### Design changes
+
+The report includes selected Figma node-property differences and before-and-after screenshots rendered from Figma versions.
+
+### Engineering changes
+
+The report includes Git change metadata, changed files, and commit history between the selected references.
+
+### Visual evidence
+
+Before-and-after images are displayed side by side. V1 does not calculate pixel-level image differences or automatically determine whether two screens are visually equivalent.
+
+### Design-to-code alignment
+
+Alignment is deliberately marked as `not-verified` unless supported by additional direct evidence.
+
+AI-assisted interpretation may help reviewers investigate potential relationships between design and code changes, but an interpretation is not proof that the implementation matches the design.
+
+### Release status
+
+Release status is not inferred from a Git
